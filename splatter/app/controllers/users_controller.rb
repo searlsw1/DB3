@@ -69,33 +69,28 @@ before_filter :set_headers
 
   #POST ADD_FOLLOWS
   def add_follows
-    @user = User.find(params[:id])
-    @follows = User.find(params[:follows_id])
+	@user = User.find(params[:id])
+	@follows = User.find(params[:follows_id])
 
-    #nav property - user.follows
-    if @user.follows << @follows
+	if @user.follows << @follows and @follows.followers << @user
+  		head :no_content
+		render json: @user.follows
+	else
+		render json: @user.errors, status: :unprocessable_entity
+	end
+  end
 
-      #204 No Content HTTP status 
-      head :no_content
-
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
-  end	
 
   #POST DELETE_FOLLOWS
   def delete_follows
-    @user = User.find(params[:id])
-    @follows = User.find(params[:follows_id])
-
-    if @user.follows.delete(@follows)
-
-      #204 No Content HTTP status 
-      head :no_content
-
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
+   	@user = User.find(params[:id])
+	@follows = User.find(params[:follows_id])
+		
+	if @user.follows.delete(@follows) << @follows.followers.delete(@user)
+		render json: @user.follows.destroy
+	else 
+		render json: @user.errors, status: :unprocessable_entity
+	end
   end
 
   #SPLATTS
