@@ -27,12 +27,6 @@ gem 'sqlite3'
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'
 
-<<<<<<< HEAD
-gem 'mongoid', github: 'mongoid/mongoid'
-=======
-
-
 gem 'mongoid', github: 'mongoid/mongoid'
 
->>>>>>> db50cb42eb91de0e5bc81123d3f6f9f7b15b2756
 gem 'bson_ext'
