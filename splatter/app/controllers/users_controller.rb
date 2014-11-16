@@ -94,6 +94,27 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
     render json: @user.splatts
   end 
+  
+  #MongoDB MapReduce functionality
+  def splatts_count
+		map = %Q{ function () {
+			var length = 0;
+			if(this.splatts) {
+				length = this.splatts.length
+			}
+			emit("count", length);
+		}
+		
+		reduce = %Q{ function(key, val) {
+				var data = 0;
+				val.forEach(function(v) {
+					data += v;
+				})
+				return data;
+			}
+		}
+		User.map_reduce(map,reduce).out(inline: true)
+	end
 
 
   #FEED
