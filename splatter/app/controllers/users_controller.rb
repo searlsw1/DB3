@@ -115,12 +115,38 @@ class UsersController < ApplicationController
 		}
 		User.map_reduce(map,reduce).out(inline: true)
 	end
-
-
-  #FEED
-  def feed
-    @feed = Splatt.find_by_sql("SELECT splatts.body, splatts.user_id, splatts.id, splatts.created_at FROM splatts JOIN follows ON follows.followed_id=splatts.user_id WHERE follows.follower_id=#{params[:id]} ORDER BY created_at DESC")
-    render json: @feed
-  end
+	
+	#NewsFeed
+	def feed
+		map = %Q{ function() {
+				if(this.splatts) {
+					emit("feed", {"list": this.splatts})
+				}
+			}
+		}
+				
+		reduce = %Q{ function(key, val) {
+				var myfeed = {"list": []};
+				val.forEach(function(v) {
+					myfeed.list = myfeed.list.concat(v.list);
+				});
+				return myfeed;
+			}
+		}
+		
+		finalise = %Q{ function(key, val) {
+				var mylist = val.list;
+				if(mylist) {
+					mylist.sort(function(a, b) {
+				return b.created_at - a.created_at});
+				 }
+				 return {"list": mylist};
+			}
+		}
+		
+		@user = User.find(params[:id])
+		@result = User.in(id: @user.follow_ids).map_reduce(map, reduce).out(inline: true).finalize(finalise)
+		render json: @result.entries[0][:value][:list]
+	end
 
 end
