@@ -66,18 +66,15 @@ class UsersController < ApplicationController
 
   #POST ADD_FOLLOWS
   def add_follows
-    @user = User.find(params[:id])
-    @follows = User.find(params[:follows_id])
-
-    #nav property - user.follows
-    if @user.follows << @follows
-
-      #204 No Content HTTP status 
-      head :no_content
-
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
+	@user = User.find(params[:id])
+	@follows = User.find(params[:follows_id])
+	
+	if @user.follows << @follows and @follows.follower << @user
+		head :no_content
+		render json: @user.follows
+	else
+		render json: @user.errors, status: :unprocessable_entity
+	end
   end	
 
   #POST DELETE_FOLLOWS
@@ -85,13 +82,10 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
     @follows = User.find(params[:follows_id])
 
-    if @user.follows.delete(@follows)
-
-      #204 No Content HTTP status 
-      head :no_content
-
+    if @follower.follows.destroy(@follows)
+	head :no_content
     else
-      render json: @user.errors, status: :unprocessable_entity
+	render json: @follower.errors, status: :unprocessable_entity
     end
   end
 

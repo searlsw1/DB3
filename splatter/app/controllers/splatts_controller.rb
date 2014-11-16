@@ -1,4 +1,6 @@
 class SplattsController < ApplicationController
+before_filter :set_headers
+
   # GET /splatts
   # GET /splatts.json
   def index
@@ -18,14 +20,15 @@ class SplattsController < ApplicationController
   # POST /splatts
   # POST /splatts.json
   def create
-    @splatt = Splatt.new(splatts_params(params[:splatt]))
-
-    if @splatt.save
-      render json: @splatt, status: :created, location: @splatt
-    else
-      render json: @splatt.errors, status: :unprocessable_entity
-    end
+    @user = User.find(params[:user_id])
+	splatt = Splatt.new({:body => params[:body]})
+	if @user.splatts.push(splatt)
+		render json: splatt, status: :created, location: @user
+	else
+		render json: @user.errors, status: :unprocessable_entity
+	end
   end
+
 
   # DELETE /splatts/1
   # DELETE /splatts/1.json
@@ -34,6 +37,18 @@ class SplattsController < ApplicationController
     @splatt.destroy
 
     head :no_content
+  end
+
+ # PATCH/PUT /users/1
+  # PATCH/PUT /users/1.json
+  def update
+    @user = User.find(params[:id])
+
+    if @user.update(user_params(params))
+      head :no_content
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
   end
 
   #The permit method returns a copy of the parameters object, returning
