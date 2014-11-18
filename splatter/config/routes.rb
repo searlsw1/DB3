@@ -6,6 +6,7 @@ Splatter::Application.routes.draw do
 
   get 'users/splatts/:id' => 'users#splatts'
   get 'users/feed/:id' => 'users#feed'
+  get 'users/splatts/:id' => 'users#splatts', :constraints => {:id => /[0-9a-zA-Z\-\.\@]+/}
 
 get 'users/follows/:id' => 'users#show_follows'
 get 'users/followers/:id' => 'users#show_followers'

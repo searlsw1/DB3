@@ -102,11 +102,12 @@ class UsersController < ApplicationController
 
   #SPLATTS
   def splatts
-    @user = User.find(params[:id])
-    render json: @user.splatts
-  end 
-
-
+	db = UserRepository.new(Riak::Client.new)
+	@user = db.find(params[:id])
+	db = SplattRepository.new(Riak::Client.new, @user)
+	render json: db.all
+  end
+ 
   #FEED
   def feed
     @feed = Splatt.find_by_sql("SELECT splatts.body, splatts.user_id, splatts.id, splatts.created_at FROM splatts JOIN follows ON follows.followed_id=splatts.user_id WHERE follows.follower_id=#{params[:id]} ORDER BY created_at DESC")
