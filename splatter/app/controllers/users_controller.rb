@@ -64,40 +64,35 @@ class UsersController < ApplicationController
   end 	
 
   #GET SHOW_FOLLOWERS
-  def show_followers
-    @user = User.find(params[:id])
-    render json: @user.followers
+  def show_follows
+  	@user = User.find(params[:id])
+ 	render json: @user.followed_by #followers of a given user
   end
 
   #POST ADD_FOLLOWS
   def add_follows
-    @user = User.find(params[:id])
-    @follows = User.find(params[:follows_id])
-
-    #nav property - user.follows
-    if @user.follows << @follows
-
-      #204 No Content HTTP status 
-      head :no_content
-
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
+	db = UserRepository.new(Riak::Client.new)
+	@follower = db.find(params[:id])
+	@followed = db.find(params[:follows_id])
+		
+	if db.follow(@follower, @followed)
+		head: no_content
+	else
+		render json: "error saving follow relationship", status: :unprocessable_entity
+	end
   end	
 
   #POST DELETE_FOLLOWS
   def delete_follows
-    @user = User.find(params[:id])
-    @follows = User.find(params[:follows_id])
-
-    if @user.follows.delete(@follows)
-
-      #204 No Content HTTP status 
-      head :no_content
-
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
+	db = UserRepository.new(Riak::Client.new)
+	@follower = db.find(params[:id])
+	@followed = db.find(params[:follows_id])
+		
+	if db.follow.delete(@follower, @followed)
+		head :no_content
+	else
+		render json: "error deleting unfollow relationship", status: :unprocessable_entity
+	end	
   end
 
   #SPLATTS
