@@ -113,6 +113,7 @@ class UsersController < ApplicationController
 				return data;
 			}
 		}
+		}
 		User.map_reduce(map,reduce).out(inline: true)
 	end
 	
